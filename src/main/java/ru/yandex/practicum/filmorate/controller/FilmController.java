@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -24,7 +25,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         if (!films.containsKey(film.getId())) {
-            throw new IllegalArgumentException("Фильм с таким ID не найден");
+            throw new ValidationException("Фильм с таким ID не найден");
         }
         films.put(film.getId(), film);
         return film;

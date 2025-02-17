@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -16,7 +17,7 @@ public class UserController {
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
         user.setId(userId++);
@@ -27,7 +28,7 @@ public class UserController {
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
         if (!users.containsKey(user.getId())) {
-            throw new IllegalArgumentException("Пользователь с таким ID не найден");
+            throw new ValidationException("Пользователь с таким ID не найден");
         }
         users.put(user.getId(), user);
         return user;

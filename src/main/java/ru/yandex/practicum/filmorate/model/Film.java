@@ -1,11 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.NonNull;
 
 import java.time.LocalDate;
 
@@ -19,7 +15,7 @@ public class Film {
     @Size(max = 200, message = "Описание не может превышать 200 символов")
     private String description;
 
-    @NonNull
+    @NotNull
     @AssertTrue(message = "Дата релиза не может быть раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
 

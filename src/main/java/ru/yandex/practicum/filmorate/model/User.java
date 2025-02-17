@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.NonNull;
 
 import java.time.LocalDate;
 
@@ -20,7 +19,7 @@ public class User {
 
     private String name;
 
-    @NonNull
+    @NotNull
     @Past(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
 
