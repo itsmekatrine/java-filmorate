@@ -16,7 +16,7 @@ public class Film {
     private String description;
 
     @NotNull
-    @AssertTrue(message = "Дата релиза не может быть раньше 28 декабря 1895 года")
+    @PastOrPresent(message = "Дата релиза не может быть раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
