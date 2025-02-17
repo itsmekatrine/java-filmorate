@@ -1,0 +1,30 @@
+package ru.yandex.practicum.filmorate.model;
+
+import jakarta.validation.constraints.*;
+import lombok.Data;
+import lombok.NonNull;
+
+import java.time.LocalDate;
+
+@Data
+public class User {
+    private int id;
+
+    @NotEmpty(message = "Электронная почта не может быть пустой")
+    @Email(message = "Некорректный формат электронной почты")
+    private String email;
+
+    @NotEmpty(message = "Логин не может быть пустым")
+    @Pattern(regexp = "^\\S*$", message = "Логин не должен содержать пробелы")
+    private String login;
+
+    private String name;
+
+    @NonNull
+    @Past(message = "Дата рождения не может быть в будущем")
+    private LocalDate birthday;
+
+    public void setName(String name) {
+        this.name = (name == null || name.trim().isEmpty()) ? this.login : name;
+    }
+}
