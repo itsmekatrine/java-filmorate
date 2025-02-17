@@ -9,11 +9,11 @@ import java.time.LocalDate;
 public class User {
     private int id;
 
-    @NotEmpty(message = "Электронная почта не может быть пустой")
+    @NotBlank(message = "Электронная почта не может быть пустой")
     @Email(message = "Некорректный формат электронной почты")
     private String email;
 
-    @NotEmpty(message = "Логин не может быть пустым")
+    @NotBlank(message = "Логин не может быть пустым")
     @Pattern(regexp = "^\\S*$", message = "Логин не должен содержать пробелы")
     private String login;
 
