@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Data
 public class Film {
-    private int id;
+    private Integer id;
 
     @NotBlank(message = "Название не может быть пустым")
     private String name;
@@ -25,5 +25,5 @@ public class Film {
     }
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
-    private int duration;
+    private Integer duration;
 }
