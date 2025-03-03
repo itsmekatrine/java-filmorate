@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
 
+    @Autowired
     public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
     }
@@ -67,11 +68,13 @@ public class UserService {
 
     public User getUserById(int userId) {
         return userStorage.getUserById(userId)
-                .orElseThrow(() -> new ValidationException("Пользователь с ID " + userId + " не найден"));
+                .orElseThrow(() -> new NoSuchElementException("Пользователь с ID " + userId + " не найден"));
     }
 
     public Set<User> getUserFriends(int userId) {
-        User user = getUserById(userId);
+        User user = userStorage.getUserById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Пользователь с ID " + userId + " не найден"));
+
         Set<User> friends = new HashSet<>();
         for (Integer friendId : user.getFriends()) {
             friends.add(getUserById(friendId));
