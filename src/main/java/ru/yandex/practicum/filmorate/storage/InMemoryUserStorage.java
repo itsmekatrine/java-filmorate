@@ -1,21 +1,23 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.storage;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-@RestController
-@RequestMapping("/users")
+@Component
 @Slf4j
-public class UserController {
+public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
     private int userId = 1;
 
-    @PostMapping
+    @Override
     public User createUser(@Valid @RequestBody User user) {
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
@@ -26,7 +28,7 @@ public class UserController {
         return user;
     }
 
-    @PutMapping
+    @Override
     public User updateUser(@Valid @RequestBody User user) {
         if (!users.containsKey(user.getId())) {
             log.error("Ошибка обновления: пользователь с ID {} не найден", user.getId());
@@ -37,9 +39,8 @@ public class UserController {
         return user;
     }
 
-    @GetMapping
+    @Override
     public Collection<User> getAllUsers() {
         return users.values();
     }
 }
-

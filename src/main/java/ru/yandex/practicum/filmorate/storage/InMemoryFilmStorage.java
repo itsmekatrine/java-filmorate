@@ -1,23 +1,25 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.storage;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-@RestController
-@RequestMapping("/films")
+@Component
 @Slf4j
-public class FilmController {
+public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private int filmId = 1;
     private static final LocalDate EARLIEST_DATE = LocalDate.of(1895, 12, 28);
 
-    @PostMapping
+    @Override
     public Film addFilm(@Valid @RequestBody Film film) {
         validateReleaseDate(film.getReleaseDate());
         log.info("Добавление нового фильма: {}", film);
@@ -26,7 +28,7 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping
+    @Override
     public Film updateFilm(@Valid @RequestBody Film film) {
         validateReleaseDate(film.getReleaseDate());
         if (!films.containsKey(film.getId())) {
@@ -38,7 +40,7 @@ public class FilmController {
         return film;
     }
 
-    @GetMapping
+    @Override
     public Collection<Film> getAllFilms() {
         return films.values();
     }
