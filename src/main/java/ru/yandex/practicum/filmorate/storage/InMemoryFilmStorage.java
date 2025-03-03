@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -49,5 +50,10 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (releaseDate != null && releaseDate.isBefore(EARLIEST_DATE)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
         }
+    }
+
+    @Override
+    public Optional<Film> getFilmById(int filmId) {
+        return Optional.ofNullable(films.get(filmId));
     }
 }

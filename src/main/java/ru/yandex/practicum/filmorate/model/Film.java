@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -20,4 +22,6 @@ public class Film {
 
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private Integer duration;
+
+    private Set<Integer> likes = new HashSet<>();
 }
