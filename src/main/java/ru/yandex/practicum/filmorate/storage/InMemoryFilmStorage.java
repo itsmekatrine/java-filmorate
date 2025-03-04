@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -21,7 +19,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     private static final LocalDate EARLIEST_DATE = LocalDate.of(1895, 12, 28);
 
     @Override
-    public Film addFilm(@Valid @RequestBody Film film) {
+    public Film addFilm(Film film) {
         validateReleaseDate(film.getReleaseDate());
         log.info("Добавление нового фильма: {}", film);
         film.setId(filmId++);
@@ -30,7 +28,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilm(@Valid @RequestBody Film film) {
+    public Film updateFilm(Film film) {
         validateReleaseDate(film.getReleaseDate());
         if (!films.containsKey(film.getId())) {
             log.error("Ошибка обновления: фильм с ID {} не найден", film.getId());
