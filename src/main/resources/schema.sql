@@ -1,7 +1,8 @@
 -- Таблица рейтинга
-CREATE TABLE IF NOT EXISTS mpa_ratings (
-    rating VARCHAR(10) PRIMARY KEY,
-    description VARCHAR(200)
+CREATE TABLE IF NOT EXISTS mpa (
+    id INT PRIMARY KEY,
+    rating VARCHAR(10) NOT NULL,
+    description VARCHAR(200) NOT NULL
 );
 
 -- Таблица фильмов
@@ -11,8 +12,8 @@ CREATE TABLE IF NOT EXISTS films (
     description VARCHAR(200),
     release_date DATE,
     duration INT,
-    mpa_rating VARCHAR(10),
-    FOREIGN KEY (mpa_rating) REFERENCES mpa_ratings(rating)
+    mpa_id INT,
+    FOREIGN KEY (mpa_id) REFERENCES mpa(id)
 );
 
 -- Таблица жанров
