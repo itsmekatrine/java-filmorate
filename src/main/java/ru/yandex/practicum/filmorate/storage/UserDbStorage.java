@@ -59,4 +59,20 @@ public class UserDbStorage implements UserStorage {
             return Optional.empty();
         }
     }
+
+    public void addFriend(int userId, int friendId) {
+        String check = "SELECT status FROM friendships WHERE user_id = ? AND friend_id = ?";
+        List<String> result = jdbc.query(check, (rs, rowNum) -> rs.getString("status"), friendId, userId);
+
+        if (!result.isEmpty() && result.get(0).equals("PENDING")) {
+            String update = "UPDATE friendships SET status = 'CONFIRMED' WHERE user_id = ? AND friend_id = ?";
+            jdbc.update(update, friendId, userId);
+
+            String insertBack = "INSERT INTO friendships(user_id, friend_id, status) VALUES (?, ?, 'CONFIRMED')";
+            jdbc.update(insertBack, userId, friendId);
+        } else {
+            String sql = "INSERT INTO friendships(user_id, friend_id, status) VALUES (?, ?, 'PENDING')";
+            jdbc.update(sql, userId, friendId);
+        }
+    }
 }

@@ -42,8 +42,7 @@ public class UserService {
         User friend = userStorage.getUserById(friendId)
                 .orElseThrow(() -> new NoSuchElementException("Друг с ID " + friendId + " не найден"));
 
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+        userStorage.addFriend(userId, friendId);
     }
 
     public void removeFriend(int userId, int friendId) {

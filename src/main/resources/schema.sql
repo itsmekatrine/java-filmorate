@@ -16,6 +16,15 @@ CREATE TABLE IF NOT EXISTS films (
     FOREIGN KEY (mpa_id) REFERENCES mpa(id)
 );
 
+-- Таблица пользователей
+CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(200) NOT NULL,
+    login VARCHAR(100) NOT NULL,
+    name VARCHAR(200),
+    birthday DATE
+);
+
 -- Таблица жанров
 CREATE TABLE IF NOT EXISTS genres (
     id INT PRIMARY KEY,
@@ -31,20 +40,20 @@ CREATE TABLE IF NOT EXISTS film_genres (
     FOREIGN KEY (genre_id) REFERENCES genres(id)
 );
 
--- Таблица пользователей
-CREATE TABLE IF NOT EXISTS users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(200) NOT NULL,
-    login VARCHAR(100) NOT NULL,
-    name VARCHAR(200),
-    birthday DATE
+-- Таблица лайков
+CREATE TABLE IF NOT EXISTS film_likes (
+    film_id INT NOT NULL,
+    user_id INT NOT NULL,
+    PRIMARY KEY (film_id, user_id),
+    FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Таблица друзей пользователя
 CREATE TABLE IF NOT EXISTS friendships (
     user_id INT,
     friend_id INT,
-    status VARCHAR(20),
+    status VARCHAR(20) DEFAULT 'PENDING',
     PRIMARY KEY (user_id, friend_id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (friend_id) REFERENCES users(id)

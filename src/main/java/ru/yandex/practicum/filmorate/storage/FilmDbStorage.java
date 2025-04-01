@@ -108,4 +108,22 @@ public class FilmDbStorage implements FilmStorage {
             return genre;
         }, filmId));
     }
+
+    @Override
+    public void addLike(int filmId, int userId) {
+        String sql = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
+        jdbc.update(sql, filmId, userId);
+    }
+
+    @Override
+    public void removeLike(int filmId, int userId) {
+        String sql = "DELETE FROM film_likes WHERE film_id = ? AND user_id = ?";
+        jdbc.update(sql, filmId, userId);
+    }
+
+    @Override
+    public Set<Integer> getLikes(int filmId) {
+        String sql = "SELECT user_id FROM film_likes WHERE film_id = ?";
+        return new HashSet<>(jdbc.query(sql, (rs, rowNum) -> rs.getInt("user_id"), filmId));
+    }
 }
