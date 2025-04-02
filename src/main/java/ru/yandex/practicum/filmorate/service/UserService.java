@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,23 +44,21 @@ public class UserService {
     }
 
     public void removeFriend(int userId, int friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+        User user = userStorage.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
+        User friend = userStorage.getUserById(friendId)
+                .orElseThrow(() -> new NotFoundException("User with id " + friendId + " not found"));
+
+        userStorage.removeFriend(userId, friendId);
     }
 
-    public Set<User> getCommonFriends(int userId, int otherUserId) {
-        User user = getUserById(userId);
-        User otherUser = getUserById(otherUserId);
+    public Set<User> getCommonFriends(int userId, int otherId) {
+        userStorage.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
+        userStorage.getUserById(otherId)
+                .orElseThrow(() -> new NotFoundException("User with id " + otherId + " not found"));
 
-        Set<Integer> commonFriendIds = user.getFriends().stream()
-                .filter(otherUser.getFriends()::contains)
-                .collect(Collectors.toSet());
-
-        return commonFriendIds.stream()
-                .map(this::getUserById)
-                .collect(Collectors.toSet());
+        return userStorage.getCommonFriends(userId, otherId);
     }
 
     public User getUserById(int userId) {
@@ -72,12 +68,8 @@ public class UserService {
 
     public Set<User> getUserFriends(int userId) {
         User user = userStorage.getUserById(userId)
-                .orElseThrow(() -> new NoSuchElementException("Пользователь с ID " + userId + " не найден"));
+                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
 
-        Set<User> friends = new HashSet<>();
-        for (Integer friendId : user.getFriends()) {
-            friends.add(getUserById(friendId));
-        }
-        return friends;
+        return new HashSet<>(userStorage.getFriends(userId));
     }
 }

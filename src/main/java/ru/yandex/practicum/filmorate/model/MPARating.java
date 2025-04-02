@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 public class MPARating {
     private Integer id;
-    private String rating;
+    private String name;
     private String description;
+
+    public MPARating(Integer id) {
+        this.id = id;
+    }
 }

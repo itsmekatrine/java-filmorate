@@ -61,18 +61,40 @@ public class UserDbStorage implements UserStorage {
     }
 
     public void addFriend(int userId, int friendId) {
-        String check = "SELECT status FROM friendships WHERE user_id = ? AND friend_id = ?";
-        List<String> result = jdbc.query(check, (rs, rowNum) -> rs.getString("status"), friendId, userId);
+        String check = "SELECT COUNT(*) FROM friendships WHERE user_id = ? AND friend_id = ?";
+        Integer count = jdbc.queryForObject(check, Integer.class, userId, friendId);
 
-        if (!result.isEmpty() && result.get(0).equals("PENDING")) {
-            String update = "UPDATE friendships SET status = 'CONFIRMED' WHERE user_id = ? AND friend_id = ?";
-            jdbc.update(update, friendId, userId);
-
-            String insertBack = "INSERT INTO friendships(user_id, friend_id, status) VALUES (?, ?, 'CONFIRMED')";
-            jdbc.update(insertBack, userId, friendId);
-        } else {
-            String sql = "INSERT INTO friendships(user_id, friend_id, status) VALUES (?, ?, 'PENDING')";
-            jdbc.update(sql, userId, friendId);
+        if (count == 0) {
+            jdbc.update("INSERT INTO friendships (user_id, friend_id) VALUES (?, ?)", userId, friendId);
         }
+    }
+
+    @Override
+    public List<User> getFriends(int userId) {
+        String sql = """
+        SELECT u.*
+        FROM users u
+        JOIN friendships f ON u.id = f.friend_id
+        WHERE f.user_id = ?
+    """;
+        return jdbc.query(sql, mapper, userId);
+    }
+
+    @Override
+    public void removeFriend(int userId, int friendId) {
+        jdbc.update("DELETE FROM friendships WHERE user_id = ? AND friend_id = ?", userId, friendId);
+    }
+
+    @Override
+    public Set<User> getCommonFriends(int userId, int otherId) {
+        String sql = """
+        SELECT u.*
+        FROM users u
+        JOIN friendships f1 ON u.id = f1.friend_id
+        JOIN friendships f2 ON u.id = f2.friend_id
+        WHERE f1.user_id = ? AND f2.user_id = ?
+    """;
+
+        return new HashSet<>(jdbc.query(sql, mapper, userId, otherId));
     }
 }

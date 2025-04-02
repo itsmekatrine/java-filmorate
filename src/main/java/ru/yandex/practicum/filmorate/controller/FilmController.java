@@ -4,9 +4,11 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,6 +25,10 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
+        LocalDate minDate = LocalDate.of(1895, 12, 28);
+        if (film.getReleaseDate().isBefore(minDate)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
+        }
         log.info("Добавление нового фильма: {}", film);
         return filmService.addFilm(film);
     }

@@ -20,19 +20,19 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public List<MPARating> findAll() {
-        String sql = "SELECT * FROM mpa";
+        String sql = "SELECT * FROM MPA";
         return jdbc.query(sql, (rs, rowNum) ->
                 new MPARating(rs.getInt("id"),
-                        rs.getString("rating"),
+                        rs.getString("name"),
                         rs.getString("description")));
     }
 
     @Override
     public Optional<MPARating> findById(int id) {
-        String sql = "SELECT * FROM mpa WHERE id = ?";
+        String sql = "SELECT * FROM MPA WHERE id = ?";
         List<MPARating> result = jdbc.query(sql, (rs, rowNum) ->
                 new MPARating(rs.getInt("id"),
-                        rs.getString("rating"),
+                        rs.getString("name"),
                         rs.getString("description")), id);
         return result.stream().findFirst();
     }

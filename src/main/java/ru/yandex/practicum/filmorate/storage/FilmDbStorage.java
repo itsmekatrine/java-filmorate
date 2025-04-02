@@ -38,10 +38,12 @@ public class FilmDbStorage implements FilmStorage {
         }, keyHolder);
         film.setId(keyHolder.getKey().intValue());
 
-        if (film.getGenres() != null) {
-            insertGenres(film.getId(), film.getGenres());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            for (Genre genre : film.getGenres()) {
+                jdbc.update("INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)", film.getId(), genre.getId());
+            }
         }
-
+        film.setGenres(findGenresByFilmId(film.getId()));
         return film;
     }
 
@@ -53,7 +55,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(),
                 java.sql.Date.valueOf(film.getReleaseDate()),
                 film.getDuration(),
-                film.getMpa().getRating(),
+                film.getMpa().getName(),
                 film.getId());
 
         jdbc.update("DELETE FROM film_genres WHERE film_id = ?", film.getId());
@@ -67,18 +69,29 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAllFilms() {
-        String sql = "SELECT f.*, m.id AS mpa_id, m.rating AS mpa_rating, m.description AS mpa_description " +
-                "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.id";
+        String sql = """
+           SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id,
+                m.id AS mpa_id, m.name AS mpa_name, m.description AS mpa_description
+           FROM films f
+           LEFT JOIN mpa m ON f.mpa_id = m.id
+        """;
         List<Film> films = jdbc.query(sql, filmMapper);
-        films.forEach(f -> f.setGenres(findGenresByFilmId(f.getId())));
+        for (Film film : films) {
+            film.setGenres(findGenresByFilmId(film.getId()));
+            film.setLikes(getLikes(film.getId()));
+        }
         return films;
     }
 
     @Override
     public Optional<Film> getFilmById(int filmId) {
-        String sql = "SELECT f.*, m.id AS mpa_rating, m.rating AS mpa_description " +
-                "FROM films f LEFT JOIN mpa m ON f.mpa_id = m.id " +
-                "WHERE f.id = ?";
+        String sql = """
+        SELECT f.id, f.name, f.description, f.release_date, f.duration, f.mpa_id,
+               m.id AS mpa_id, m.name AS mpa_name, m.description AS mpa_description
+        FROM films f
+        LEFT JOIN mpa m ON f.mpa_id = m.id
+        WHERE f.id = ?
+        """;
         try {
             Film film = jdbc.queryForObject(sql, filmMapper, filmId);
             if (film != null) {
@@ -100,18 +113,20 @@ public class FilmDbStorage implements FilmStorage {
     private Set<Genre> findGenresByFilmId(int filmId) {
         String sql = "SELECT g.id, g.name FROM genres g " +
                 "JOIN film_genres fg ON fg.genre_id = g.id " +
-                "WHERE fg.film_id = ?";
-        return new HashSet<>(jdbc.query(sql, (rs, rowNum) -> {
+                "WHERE fg.film_id = ?" +
+                "ORDER BY g.id";
+        List<Genre> genres = jdbc.query(sql, (rs, rowNum) -> {
             Genre genre = new Genre();
             genre.setId(rs.getInt("id"));
             genre.setName(rs.getString("name"));
             return genre;
-        }, filmId));
+        }, filmId);
+        return new LinkedHashSet<>(genres);
     }
 
     @Override
     public void addLike(int filmId, int userId) {
-        String sql = "INSERT INTO film_likes (film_id, user_id) VALUES (?, ?)";
+        String sql = "MERGE INTO film_likes (film_id, user_id) VALUES (?, ?)";
         jdbc.update(sql, filmId, userId);
     }
 

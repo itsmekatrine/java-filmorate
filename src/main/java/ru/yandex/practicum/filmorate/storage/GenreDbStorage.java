@@ -6,8 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 @Qualifier("genreDbStorage")
@@ -32,5 +31,18 @@ public class GenreDbStorage implements GenreStorage {
         List<Genre> result = jdbc.query(sql, (rs, rowNum) ->
                 new Genre(rs.getInt("id"), rs.getString("name")), id);
         return result.stream().findFirst();
+    }
+
+    @Override
+    public Set<Genre> getByIds(Set<Integer> ids) {
+        if (ids == null || ids.isEmpty()) return Collections.emptySet();
+
+        String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String sql = "SELECT * FROM genres WHERE id IN (" + inSql + ")";
+
+        return new HashSet<>(jdbc.query(sql, ids.toArray(), (rs, rowNum) -> new Genre(
+                rs.getInt("id"),
+                rs.getString("name")
+        )));
     }
 }
