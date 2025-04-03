@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Qualifier("filmDbStorage")
@@ -76,8 +77,10 @@ public class FilmDbStorage implements FilmStorage {
            LEFT JOIN mpa m ON f.mpa_id = m.id
         """;
         List<Film> films = jdbc.query(sql, filmMapper);
+
+        Map<Integer, Set<Genre>> genresByFilmId = findGenresForFilms(films);
         for (Film film : films) {
-            film.setGenres(findGenresByFilmId(film.getId()));
+            film.setGenres(genresByFilmId.getOrDefault(film.getId(), new LinkedHashSet<>()));
             film.setLikes(getLikes(film.getId()));
         }
         return films;
@@ -122,6 +125,37 @@ public class FilmDbStorage implements FilmStorage {
             return genre;
         }, filmId);
         return new LinkedHashSet<>(genres);
+    }
+
+    private Map<Integer, Set<Genre>> findGenresForFilms(List<Film> films) {
+        Map<Integer, Set<Genre>> genresByFilm = new HashMap<>();
+
+        if (films.isEmpty()) {
+            return genresByFilm;
+        }
+
+        List<Integer> filmIds = films.stream()
+                .map(Film::getId)
+                .collect(Collectors.toList());
+
+        String placeholders = String.join(",", Collections.nCopies(filmIds.size(), "?"));
+        String sql = "SELECT fg.film_id, g.id, g.name " +
+                "FROM film_genres fg " +
+                "JOIN genres g ON fg.genre_id = g.id " +
+                "WHERE fg.film_id IN (" + placeholders + ") " +
+                "ORDER BY g.id";
+        jdbc.query(sql, filmIds.toArray(), rs -> {
+            while (rs.next()) {
+                int filmId = rs.getInt("film_id");
+                Genre genre = new Genre();
+                genre.setId(rs.getInt("id"));
+                genre.setName(rs.getString("name"));
+                genresByFilm
+                        .computeIfAbsent(filmId, id -> new LinkedHashSet<>())
+                        .add(genre);
+            }
+        });
+        return genresByFilm;
     }
 
     @Override
