@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,10 @@ public class FilmService {
     public Film addFilm(Film film) {
         log.info("Запрос на добавление фильма: {}", film);
 
+        LocalDate minDate = LocalDate.of(1895, 12, 28);
+        if (film.getReleaseDate().isBefore(minDate)) {
+            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895");
+        }
         if (film.getMpa() == null || film.getMpa().getId() == null) {
             throw new ValidationException("Поле 'mpa' обязательно и должно содержать id");
         }
