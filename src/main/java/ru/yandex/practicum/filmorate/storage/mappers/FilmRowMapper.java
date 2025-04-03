@@ -19,12 +19,16 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getInt("duration"));
 
-        MPARating mpa = new MPARating();
-        mpa.setId(rs.getInt("mpa_id"));
-        mpa.setName(rs.getString("mpa_name"));
-        mpa.setDescription(rs.getString("mpa_description"));
-        film.setMpa(mpa);
-
+        int mpaId = rs.getInt("mpa_id");
+        if (!rs.wasNull()) {
+            MPARating mpa = new MPARating();
+            mpa.setId(mpaId);
+            mpa.setName(rs.getString("mpa_name"));
+            mpa.setDescription(rs.getString("mpa_description"));
+            film.setMpa(mpa);
+        } else {
+            film.setMpa(null);
+        }
         return film;
     }
 }
